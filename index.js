@@ -21,8 +21,8 @@ async function run() {
         const database = client.db("Tralive");
         const collection = database.collection("destinations");
 
-        app.get('/all-destinations', async (req, res) => {
-            const cursor = collection.find({});
+        app.get('/destinations', async (req, res) => {
+            const cursor = collection.find({}).limit(6);
             const destinations = await cursor.toArray();
             res.send(destinations);
         })
