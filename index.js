@@ -18,8 +18,14 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         await client.connect();
-        const database = client.db("database_name");
-        const collection = database.collection("collection_name");
+        const database = client.db("Tralive");
+        const collection = database.collection("destinations");
+
+        app.get('/all-destinations', async (req, res) => {
+            const cursor = collection.find({});
+            const destinations = await cursor.toArray();
+            res.send(destinations);
+        })
 
     }
     finally {
