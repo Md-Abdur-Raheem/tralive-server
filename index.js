@@ -12,19 +12,36 @@ app.use(cors());
 app.use(express.json());
 
 
-const uri = `const uri = "mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.aimii.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.aimii.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
 async function run() {
     try {
         await client.connect();
         const database = client.db("Tralive");
-        const collection = database.collection("destinations");
-
+        const dectinationsCollection = database.collection("destinations");
+        
+        //get api to get 6 destinations
         app.get('/destinations', async (req, res) => {
-            const cursor = collection.find({}).limit(6);
+            const cursor = dectinationsCollection.find({}).limit(6);
             const destinations = await cursor.toArray();
             res.send(destinations);
+        })
+
+        //get api to get all destinations
+        app.get('/all-destinations', async (req, res) => {
+            const cursor = dectinationsCollection.find({});
+            const destinations = await cursor.toArray();
+            res.send(destinations);
+        })
+
+        //post api to add new destination
+        app.post('/add-new-destination', async (req, res) => {
+            console.log(req.body);
+            const newDestination = req.body;
+            const result = await dectinationsCollection.insertOne(newDestination);
+            console.log(result);
+            res.json(result);
         })
 
     }
