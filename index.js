@@ -54,7 +54,6 @@ async function run() {
         //use post to get data by keys
         app.post('/all-destinations/by_id', async (req, res) => {
             const id = req.body;
-            console.log(req);
             const query = { id: { $in: id } }
             const result = await dectinationsCollection.find(query).toArray();
             res.json(result);
@@ -92,6 +91,24 @@ async function run() {
                 res.json(result);
             }
         })
+
+
+        //api to get all users bookings
+        app.get('/all-bookings', async (req, res) => {
+            const cursor = usersBooking.find({});
+            const bookings = await cursor.toArray();
+            res.send(bookings);
+        })
+
+        app.delete('/all-bookings/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await usersBooking.deleteOne(query);
+            res.json(result);
+
+        })
+
+
 
     }
     finally {
