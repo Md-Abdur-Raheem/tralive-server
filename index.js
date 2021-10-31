@@ -44,6 +44,14 @@ async function run() {
             res.json(result);
         })
 
+        //get api to find a destination
+        app.get('/all-destinations/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await dectinationsCollection.findOne(query);
+            res.json(result);
+        })
+
     }
     finally {
         //await client.close()
