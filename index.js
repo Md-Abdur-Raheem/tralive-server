@@ -38,10 +38,8 @@ async function run() {
 
         //post api to add new destination
         app.post('/add-new-destination', async (req, res) => {
-            console.log(req.body);
             const newDestination = req.body;
             const result = await dectinationsCollection.insertOne(newDestination);
-            console.log(result);
             res.json(result);
         })
 
@@ -56,6 +54,7 @@ async function run() {
         //use post to get data by keys
         app.post('/all-destinations/by_id', async (req, res) => {
             const id = req.body;
+            console.log(req);
             const query = { id: { $in: id } }
             const result = await dectinationsCollection.find(query).toArray();
             res.json(result);
@@ -64,9 +63,7 @@ async function run() {
         //get users booking
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
-            console.log(email);
             const exists = await usersBooking.findOne({ email: email });
-            console.log(exists);
             res.send(exists)
         })
 
@@ -78,16 +75,16 @@ async function run() {
 
             const exists = await usersBooking.findOne({ email: email });
             if (exists) {
+                const previousBooking = exists.booking;
                     const filter = { email: email };
                     const options = { upsert: true };
                     const updateDoc = {
                         $set: {
                             email: email,
-                            booking: [...booking, ...booking]
+                            booking: previousBooking.concat(booking)
                       },
                     };
                     const result = await usersBooking.updateOne(filter, updateDoc, options);
-                    console.log('updating user', req);
                     res.json(result);                
             }
             else {
