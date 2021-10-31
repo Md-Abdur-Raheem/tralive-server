@@ -5,7 +5,7 @@ const ObjectId = require('mongodb').ObjectId;
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 7000;
 
 //middle wear
 app.use(cors());
@@ -20,6 +20,7 @@ async function run() {
         await client.connect();
         const database = client.db("Tralive");
         const dectinationsCollection = database.collection("destinations");
+        const usersBooking = database.collection('usersBooking');
         
         //get api to get 6 destinations
         app.get('/destinations', async (req, res) => {
@@ -50,6 +51,49 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const result = await dectinationsCollection.findOne(query);
             res.json(result);
+        })
+
+        //use post to get data by keys
+        app.post('/all-destinations/by_id', async (req, res) => {
+            const id = req.body;
+            const query = { id: { $in: id } }
+            const result = await dectinationsCollection.find(query).toArray();
+            res.json(result);
+        })
+
+        //get users booking
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const exists = await usersBooking.findOne({ email: email });
+            console.log(exists);
+            res.send(exists)
+        })
+
+
+        //add and update users bookings
+        app.post('/users/by_email', async (req, res) => {
+            const email = req.body.email;
+            const booking = req.body.booking;
+
+            const exists = await usersBooking.findOne({ email: email });
+            if (exists) {
+                    const filter = { email: email };
+                    const options = { upsert: true };
+                    const updateDoc = {
+                        $set: {
+                            email: email,
+                            booking: [...booking, ...booking]
+                      },
+                    };
+                    const result = await usersBooking.updateOne(filter, updateDoc, options);
+                    console.log('updating user', req);
+                    res.json(result);                
+            }
+            else {
+                const result = await usersBooking.insertOne(req.body);
+                res.json(result);
+            }
         })
 
     }
