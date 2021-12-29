@@ -14,6 +14,7 @@ app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.aimii.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 async function run() {
     try {
@@ -204,6 +205,25 @@ async function run() {
             res.json(result);
 
         })
+
+
+        //api for payment
+        app.post("/create-payment-intent", async (req, res) => {
+            const paymentInfo = req.body;
+            price = parseFloat(paymentInfo.price);
+
+            const amount = price * 100;
+          
+            // Create a PaymentIntent with the order amount and currency
+            const paymentIntent = await stripe.paymentIntents.create({
+              amount: amount,
+              currency: "usd",
+              automatic_payment_methods: {
+                enabled: true,
+              },
+            });
+            res.send({clientSecret: paymentIntent.client_secret});
+          });
 
 
     }
