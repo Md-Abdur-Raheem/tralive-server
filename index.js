@@ -46,6 +46,27 @@ async function run() {
             res.json(result);
         })
 
+        //api to delete a destination
+        app.delete('/all-destinations/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await dectinationsCollection.deleteOne(query);
+            res.json(result);
+        })
+
+        // api to get wish lists
+        app.get('/allDestinations', async (req, res) => {
+            const wishLists = req.query.wishLists;
+            const id = JSON.parse(wishLists);
+            
+            const idArray = id.map(i => ObjectId(i));
+
+            const filter = { _id: { $in: idArray } };
+            const result = await dectinationsCollection.find(filter).toArray();
+            
+            res.json(result);
+        })
+
         //post api to add new destination
         app.post('/add-new-destination', async (req, res) => {
             const newDestination = req.body;
@@ -75,32 +96,6 @@ async function run() {
             res.json(result);
         })
 
-
-        // ****add and update users bookings*****
-        /* app.post('/users/by_email', async (req, res) => {
-            const email = req.body.email;
-            const booking = req.body.booking;
-
-            const exists = await usersBooking.findOne({ email: email });
-            if (exists) {
-                const previousBooking = exists.booking;
-                    const filter = { email: email };
-                    const options = { upsert: true };
-                    const updateDoc = {
-                        $set: {
-                            email: email,
-                            booking: previousBooking.concat(booking)
-                      },
-                    };
-                    const result = await usersBooking.updateOne(filter, updateDoc, options);
-                    res.json(result);                
-            }
-            else {
-                const result = await usersBooking.insertOne(req.body);
-                res.json(result);
-            }
-        }) */
-
         //new api to add users booking
         app.post('/bookings', async (req, res) => {
             const newBooking = req.body;
@@ -125,14 +120,14 @@ async function run() {
 
         })
 
-        //api to delete a destination
-        app.delete('/all-destinations/:id', async (req, res) => {
+        //api to update booking status
+        app.put('/all-bookings/:id', async (req, res) => {
             const id = req.params.id;
-            const query = { _id: ObjectId(id) };
-            const result = await dectinationsCollection.deleteOne(query);
+            const updatedStatus = req.body.status;
+            const filter = { _id: ObjectId(id) };
+            const result = await bookingsCollection.updateOne(filter, { $set: { status: updatedStatus } });
             res.json(result);
         })
-
 
         //api to save users
         app.post('/users', async (req, res) => {
@@ -150,7 +145,6 @@ async function run() {
             const result = await usersCollection.updateOne(filter, updateDoc, options);
             res.json(result)
         })
-
 
         //api to make admin
         app.post('/adminUsers', async (req, res) => {
@@ -182,31 +176,6 @@ async function run() {
             }
         })
 
-        //api to update booking status
-        app.put('/all-bookings/:id', async (req, res) => {
-            const id = req.params.id;
-            const updatedStatus = req.body.status;
-            const filter = { _id: ObjectId(id) };
-            const result = await bookingsCollection.updateOne(filter, { $set: { status: updatedStatus } });
-            res.json(result);
-        })
-
-
-        // api to get wish lists
-        app.get('/allDestinations', async (req, res) => {
-            const wishLists = req.query.wishLists;
-            const id = JSON.parse(wishLists);
-            
-            const idArray = id.map(i => ObjectId(i));
-
-            const filter = { _id: { $in: idArray } };
-            const result = await dectinationsCollection.find(filter).toArray();
-            
-            res.json(result);
-
-        })
-
-
         //api for payment
         app.post("/create-payment-intent", async (req, res) => {
             const paymentInfo = req.body;
@@ -223,9 +192,8 @@ async function run() {
               },
             });
             res.send({clientSecret: paymentIntent.client_secret});
-          });
-
-
+        });
+        
     }
     finally {
         //await client.close()
