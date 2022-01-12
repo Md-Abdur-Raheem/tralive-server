@@ -75,14 +75,6 @@ async function run() {
             res.json(result);
         });
 
-        // //*****use post to get data by keys*****
-        // app.post('/all-destinations/by_id', async (req, res) => {
-        //     const id = req.body;
-        //     const query = { id: { $in: id } }
-        //     const result = await dectinationsCollection.find(query).toArray();
-        //     res.json(result);
-        // })
-
         //get users booking
         app.get('/bookings/:email', async (req, res) => {
             const email = req.params.email;
